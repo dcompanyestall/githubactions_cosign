@@ -27,12 +27,30 @@ jobs:
       with:
         push: true
         tags:  dcompanyestall/githubactions_cas2_0:v1
-        
-    - name: Scan the image and upload dependency results
-      uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
+        # Important: Add the load=true option to make the image available for subsequent steps
+        load: true
+   
+    - name: Generate SBOM with Syft
+      run: |
+        IMAGE_NAME=dcompanyestall/githubactions_cas2_0:v1  # Or construct dynamically if needed
+        docker pull "$IMAGE_NAME" # Pull the image to be able to generate the SBOM.
+          syft "docker:$IMAGE_NAME" -o spdx-json > sbom.spdx.json # Use spdx-json for a standard format
+
+    - name: Upload SBOM as artifact
+      uses: actions/upload-artifact@v3 # Updated to v3
+        with:
+          name: sbom.spdx.json
+          path: sbom.spdx.json
+
+    # Example: Scan the image for vulnerabilities (optional)
+    - name: Trivy vulnerability scan
+      run: |
+        IMAGE_NAME=dcompanyestall/githubactions_cas2_0:v1
+        trivy image --format json --output vulnerability-report.json "$IMAGE_NAME"
+      
+    - name: Upload Vulnerability Scan Report
+      uses: actions/upload-artifact@v3
       with:
-        image: "dcompanyestall/githubactions_cas2_0:v1"
-        artifact-name: githubactions2.spdx.json
-        dependency-snapshot: true
-      
-      
+        name: vulnerability-report.json
+        path: vulnerability-report.json 
+  
