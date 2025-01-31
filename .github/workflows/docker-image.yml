@@ -52,5 +52,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: vulnerability-report.json
-        path: vulnerability-report.json 
+        path: vulnerability-report.json
   
