@@ -34,6 +34,7 @@ jobs:
       uses: anchore/sbom-action@v0
       with:
         image: dcompanyestall/githubactions_cas2_0:v1
+        artifact-name: sbom.spdx.json
 
     - name: Upload SBOM as artifact
       uses: actions/upload-artifact@v4 # Updated to v4
