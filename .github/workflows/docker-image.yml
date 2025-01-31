@@ -26,5 +26,12 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         push: true
-        tags:  dcompanyestall/githubactions_cas1:v1
+        tags:  dcompanyestall/githubactions_cas2_0:v1
+        
+    - name: Scan the image and upload dependency results
+      uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
+      with:
+        image: "dcompanyestall/githubactions_cas2_0:v1"
+        artifact-name: githubactions_cas2_0.spdx.json
+        dependency-snapshot: true
       
