@@ -38,19 +38,6 @@ jobs:
 
     - name: Upload SBOM as artifact
       uses: actions/upload-artifact@v3 # Updated to v3
-        with:
+      with:
           name: sbom.spdx.json
           path: sbom.spdx.json
-
-    # Example: Scan the image for vulnerabilities (optional)
-    - name: Trivy vulnerability scan
-      run: |
-        IMAGE_NAME=dcompanyestall/githubactions_cas2_0:v1
-        trivy image --format json --output vulnerability-report.json "$IMAGE_NAME"
-      
-    - name: Upload Vulnerability Scan Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: vulnerability-report.json
-        path: vulnerability-report.json
-  
