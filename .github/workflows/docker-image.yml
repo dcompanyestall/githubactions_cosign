@@ -32,7 +32,7 @@ jobs:
       uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
       with:
         image: "dcompanyestall/githubactions_cas2_0:v1"
-        artifact-name: githubactions_cas2_0.spdx.json
+        artifact-name: githubactions2.spdx.json
         dependency-snapshot: true
       
       
