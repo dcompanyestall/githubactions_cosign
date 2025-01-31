@@ -39,4 +39,4 @@ jobs:
       uses: actions/upload-artifact@v4 # Updated to v4
       with:
           name: dcompanyestall-githubactions_cas2_0_v1.spdx.json
-          path: dcompanyestall-githubactions_cas2_0_v1.spdx.json
+          path: ./spdx.json
