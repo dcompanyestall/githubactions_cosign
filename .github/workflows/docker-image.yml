@@ -31,10 +31,9 @@ jobs:
         load: true
    
     - name: Generate SBOM with Syft
-      run: |
-        IMAGE_NAME=dcompanyestall/githubactions_cas2_0:v1  # Or construct dynamically if needed
-        docker pull "$IMAGE_NAME" # Pull the image to be able to generate the SBOM.
-          syft "docker:$IMAGE_NAME" -o spdx-json > sbom.spdx.json # Use spdx-json for a standard format
+      uses: anchore/sbom-action@v0
+      with:
+        image: dcompanyestall/githubactions_cas2_0:v1
 
     - name: Upload SBOM as artifact
       uses: actions/upload-artifact@v4 # Updated to v4
