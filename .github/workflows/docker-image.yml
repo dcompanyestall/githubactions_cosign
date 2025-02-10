@@ -27,31 +27,40 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
       
+    - name: Extract metadata for Docker image
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ secrets.DOCKERHUB_USERNAME }}/my-container
+          
     - name: Build and push the Docker image
       uses: docker/build-push-action@v4
       with:
+        context: .
         push: true
-        tags:  dcompanyestall/githubactions_cas2_0:main
+        #tags:  dcompanyestall/githubactions_cas2_0:main
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-container:latest
+        labels: ${{ steps.meta.outputs.labels }}
         # Important: Add the load=true option to make the image available for subsequent steps
         load: true
    
-    - name: Scan the image and upload dependency results
-      uses: anchore/sbom-action@v0.18.0
-      with:
-        image: "dcompanyestall/githubactions_cas2_0:main"
-        output-file: sbom-spdx-json
+    #- name: Scan the image and upload dependency results
+    #  uses: anchore/sbom-action@v0.18.0
+    #  with:
+    #    image: "dcompanyestall/githubactions_cas2_0:main"
+    #    output-file: sbom-spdx-json
         #artifact-name: sbom-spdx-json
         #id: sbom-spdx-json
-        dependency-snapshot: true
+     #   dependency-snapshot: true
         #debug: true 
         #username: ${{ secrets.DOCKERHUB_USERNAME }}
         #password: ${{ secrets.DOCKERHUB_TOKEN }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #env:
+      #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Debug SBOM file
-      run: |
-        ls -l *spdx.json || echo "SBOM file not found!"
+    #- name: Debug SBOM file
+     # run: |
+     #   ls -l *spdx.json || echo "SBOM file not found!"
 
     #- name: Upload SBOM as artifact
     #  uses: actions/upload-artifact@v4 # Updated to v4
