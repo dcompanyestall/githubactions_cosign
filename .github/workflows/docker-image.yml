@@ -41,7 +41,7 @@ jobs:
       with:
         image: "dcompanyestall/githubactions_cas2_0:main"
         #artifact-name: sbom-spdx-json
-        id: sbom-spdx-json
+        #id: sbom-spdx-json
         dependency-snapshot: true
         debug: true 
         username: ${{ secrets.DOCKERHUB_USERNAME }}
