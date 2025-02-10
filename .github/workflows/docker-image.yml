@@ -72,19 +72,28 @@ jobs:
         name: sbom-spdx-json
         path: sbom.spdx.json
 
-    - name: Push SBOM to Docker Hub as an OCI Artifact
-      run: |
-        export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_0"
-        export SBOM_FILE="sbom.spdx.json"
+    #- name: Push SBOM to Docker Hub as an OCI Artifact
+    #  run: |
+    #    export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_0"
+    #    export SBOM_FILE="sbom.spdx.json"
           
         # Create an OCI artifact with the SBOM
-        ORAS_VERSION=$(curl -s https://api.github.com/repos/oras-project/oras/releases/latest | jq -r '.tag_name')
-        curl -Lo oras.tar.gz https://github.com/oras-project/oras/releases/download/${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz
-        tar -xzf oras.tar.gz -C /usr/local/bin oras
+    #    ORAS_VERSION=$(curl -s https://api.github.com/repos/oras-project/oras/releases/latest | jq -r '.tag_name')
+    #    curl -Lo oras.tar.gz https://github.com/oras-project/oras/releases/download/${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz
+    #    tar -xzf oras.tar.gz -C /usr/local/bin oras
           
         # Push SBOM to Docker Hub as an OCI artifact
-        oras push $IMAGE_NAME:sbom --artifact-type application/vnd.syft+json $SBOM_FILE
+     #   oras push $IMAGE_NAME:sbom --artifact-type application/vnd.syft+json $SBOM_FILE
 
+    - name: Upload SBOM to GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: sbom.spdx.json
+        tag_name: latest-sbom
+        name: "SBOM for latest container image"
+        body: "This is the SBOM for the latest Docker image."
+        draft: false
+        prerelease: false
 
     - name: Attach SBOM to Docker Image in Docker Hub
       run: |
