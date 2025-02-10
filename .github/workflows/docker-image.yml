@@ -39,7 +39,7 @@ jobs:
       uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
       with:
         image: "dcompanyestall/githubactions_cas2_0:main"
-        artifact-name: sbomspdxjson
+        artifact-name: sbomspdx
         dependency-snapshot: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
