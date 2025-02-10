@@ -40,6 +40,6 @@ jobs:
     - name: Upload SBOM as artifact
       uses: actions/upload-artifact@v4 # Updated to v4
       with:
-          name: sbom-file
-          path: sbom.spdx.json
+        name: sbom-file
+        path: sbom.spdx.json
           
