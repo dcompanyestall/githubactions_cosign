@@ -43,6 +43,31 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         # Important: Add the load=true option to make the image available for subsequent steps
         load: true
+
+    - name: Install Syft for SBOM generation
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+        syft version
+
+    - name: Generate SBOM
+      run: |
+        syft ${{ secrets.DOCKERHUB_USERNAME }}/my-container:latest -o spdx-json > sbom.spdx.json
+
+    - name: Upload SBOM as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom-spdx-json
+        path: sbom.spdx.json
+
+    - name: Attach SBOM to Docker Image in Docker Hub
+      run: |
+        export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/my-container:latest"
+        export SBOM_FILE="sbom.spdx.json"
+          
+        docker pull $IMAGE_NAME
+        docker build --label "org.opencontainers.image.sbom=$SBOM_FILE" --tag $IMAGE_NAME .
+        docker push $IMAGE_NAME
+
    
     #- name: Scan the image and upload dependency results
     #  uses: anchore/sbom-action@v0.18.0
