@@ -1,4 +1,10 @@
 name: Docker Image CI
+#Logs in to Docker Hub using GitHub secrets.
+#Extracts metadata for better tagging.
+#Builds and pushes the container image to Docker Hub.
+#Uses anchore/sbom-action to generate an SBOM in SPDX format.
+#Uploads the SBOM as an artifact to GitHub.
+#Attaches the SBOM as a label to the Docker image in Docker Hub.
 
 on:
   push:
@@ -65,6 +71,20 @@ jobs:
       with:
         name: sbom-spdx-json
         path: sbom.spdx.json
+
+    - name: Push SBOM to Docker Hub as an OCI Artifact
+      run: |
+        export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/my-container"
+        export SBOM_FILE="sbom.spdx.json"
+          
+        # Create an OCI artifact with the SBOM
+        ORAS_VERSION=$(curl -s https://api.github.com/repos/oras-project/oras/releases/latest | jq -r '.tag_name')
+        curl -Lo oras.tar.gz https://github.com/oras-project/oras/releases/download/${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz
+        tar -xzf oras.tar.gz -C /usr/local/bin oras
+          
+        # Push SBOM to Docker Hub as an OCI artifact
+        oras push $IMAGE_NAME:sbom --artifact-type application/vnd.syft+json $SBOM_FILE
+
 
     - name: Attach SBOM to Docker Image in Docker Hub
       run: |
