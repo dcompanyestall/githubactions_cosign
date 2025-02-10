@@ -3,6 +3,7 @@ name: Docker Image CI
 #Extracts metadata for better tagging.
 #Builds and pushes the container image to Docker Hub.
 #Uses anchore/sbom-action to generate an SBOM in SPDX format.
+#Upload SBOM to GitHub Release
 #Uploads the SBOM as an artifact to GitHub.
 #Attaches the SBOM as a label to the Docker image in Docker Hub.
 
@@ -72,18 +73,27 @@ jobs:
         name: sbom-spdx-json
         path: sbom.spdx.json
 
+    - name: Install ORAS for OCI Artifact Support
+      run: |
+        ORAS_VERSION=$(curl -s https://api.github.com/repos/oras-project/oras/releases/latest | jq -r '.tag_name' | sed 's/v//')
+        curl -LO https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz
+        tar -xvzf oras_${ORAS_VERSION}_linux_amd64.tar.gz
+        chmod +x oras
+        sudo mv oras /usr/local/bin/oras
+        oras version
+
     - name: Push SBOM to Docker Hub as an OCI Artifact
       run: |
         export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_0"
         export SBOM_FILE="sbom.spdx.json"
-          
-        # Create an OCI artifact with the SBOM
-        ORAS_VERSION=$(curl -s https://api.github.com/repos/oras-project/oras/releases/latest | jq -r '.tag_name')
-        curl -Lo oras.tar.gz https://github.com/oras-project/oras/releases/download/${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz
-        tar -xzf oras.tar.gz -C /usr/local/bin oras
-          
-        # Push SBOM to Docker Hub as an OCI artifact
-        oras push $IMAGE_NAME:sbom --artifact-type application/vnd.syft+json $SBOM_FILE
+
+        # Authenticate with Docker Hub
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | oras login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin docker.io
+
+        # Push SBOM to Docker Hub as an OCI Artifact
+        oras push docker.io/$IMAGE_NAME:sbom \
+          --artifact-type "application/vnd.syft+json" \
+          $SBOM_FILE:application/vnd.syft+json
 
     - name: Upload SBOM to GitHub Release
       uses: softprops/action-gh-release@v1
