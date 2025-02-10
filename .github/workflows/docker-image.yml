@@ -40,12 +40,13 @@ jobs:
       uses: anchore/sbom-action@v0.18.0
       with:
         image: "dcompanyestall/githubactions_cas2_0:main"
+        output-file: sbom-spdx-json
         #artifact-name: sbom-spdx-json
         #id: sbom-spdx-json
         dependency-snapshot: true
-        debug: true 
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        #debug: true 
+        #username: ${{ secrets.DOCKERHUB_USERNAME }}
+        #password: ${{ secrets.DOCKERHUB_TOKEN }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
