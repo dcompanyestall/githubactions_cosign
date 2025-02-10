@@ -51,7 +51,7 @@ jobs:
 
     - name: Debug SBOM file
       run: |
-        ls -l sbom-spdx-json || echo "SBOM file not found!"
+        ls -l *spdx.json || echo "SBOM file not found!"
 
     #- name: Upload SBOM as artifact
     #  uses: actions/upload-artifact@v4 # Updated to v4
