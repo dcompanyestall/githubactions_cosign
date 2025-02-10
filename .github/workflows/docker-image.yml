@@ -3,6 +3,7 @@ name: Docker Image CI
 #Extracts metadata for better tagging.
 #Builds and pushes the container image to Docker Hub.
 #Uses anchore/sbom-action to generate an SBOM in SPDX format.
+#Push SBOM to Docker Hub as an OCI Artifact
 #Upload SBOM to GitHub Release
 #Uploads the SBOM as an artifact to GitHub.
 #Attaches the SBOM as a label to the Docker image in Docker Hub.
