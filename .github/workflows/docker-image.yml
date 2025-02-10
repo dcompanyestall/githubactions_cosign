@@ -16,6 +16,7 @@ jobs:
       packages: write
       id-token: write
       actions: write
+      security-events: write
 
     steps:
     - name: Checkout the repository code
@@ -39,10 +40,15 @@ jobs:
       uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
       with:
         image: "dcompanyestall/githubactions_cas2_0:main"
-        artifact-name: sbomspdx_githubactions_cas2
+        artifact-name: sbom-spdx-json
         dependency-snapshot: true
+        debug: true 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Debug SBOM file
+      run: |
+        ls -l sbom-spdx-json || echo "SBOM file not found!"
 
     #- name: Upload SBOM as artifact
     #  uses: actions/upload-artifact@v4 # Updated to v4
