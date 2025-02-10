@@ -11,6 +11,10 @@ name: Docker Image CI
 on:
   push:
     branches: [ "main" ]
+    # Publish semrer tags as releases.
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ "main" ]
 
 permissions:
     contents: write
@@ -18,6 +22,12 @@ permissions:
     id-token: write
     actions: write
     security-events: write
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
 
@@ -29,11 +39,29 @@ jobs:
     - name: Checkout the repository code
       uses: actions/checkout@v4
 
+    # Install the cosign tool except on PR
+    # https://github.com/sigstore/cosign-installer
+    - name: Install cosign
+      if: github.event_name != 'pull_request'
+      uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
+      with:
+        cosign-release: 'v2.2.4'
+
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # Login against a Docker registry except on PR
+    # https://github.com/docker/login-action
+    - name: Log into registry ${{ env.REGISTRY }}
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
       
     - name: Extract metadata for Docker image
       id: meta
@@ -115,12 +143,29 @@ jobs:
         docker build --label "org.opencontainers.image.sbom=$SBOM_FILE" --tag $IMAGE_NAME .
         docker push $IMAGE_NAME
 
-   
-    #- name: Scan the image and upload dependency results
-    #  uses: anchore/sbom-action@v0.18.0
-    #  with:
-    #    image: "dcompanyestall/githubactions_cas2_0:main"
-    #    output-file: sbom-spdx-json
+   # Sign the resulting Docker image digest except on PRs.
+    # This will only write to the public Rekor transparency log when the Docker
+    # repository is public to avoid leaking data.  If you would like to publish
+    # transparency data even for private images, pass --force to cosign below.
+    # https://github.com/sigstore/cosign
+    - name: Sign the published Docker image
+      if: ${{ github.event_name != 'pull_request' }}
+      env:
+        # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
+        TAGS: ${{ steps.meta.outputs.tags }}
+        DIGEST: ${{ steps.build-and-push.outputs.digest }}
+        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        # This step uses the identity token to provision an ephemeral certificate
+        # against the sigstore community Fulcio instance.
+        #run: echo "${TAGS}" | xargs -I {} cosign sign --yes --key ${COSIGN_PRIVATE_KEY} @${DIGEST}
+        run: cosign sign --yes --key env://COSIGN_PRIVATE_KEY  ghcr.io/${{ github.repository }}:main   
+      
+      #- name: Scan the image and upload dependency results
+      #  uses: anchore/sbom-action@v0.18.0
+      #  with:
+      #    image: "dcompanyestall/githubactions_cas2_0:main"
+      #    output-file: sbom-spdx-json
         #artifact-name: sbom-spdx-json
         #id: sbom-spdx-json
      #   dependency-snapshot: true
