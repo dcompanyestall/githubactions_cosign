@@ -38,9 +38,9 @@ jobs:
 
     - name: Upload SBOM as artifact
       uses: actions/upload-artifact@v4 # Updated to v4
-        with:
-          name: sbom.spdx.json
-          path: sbom.spdx.json
+      with:
+        name: sbom.spdx.json
+        path: sbom.spdx.json
 
     # Example: Scan the image for vulnerabilities (optional)
     - name: Trivy vulnerability scan
@@ -53,3 +53,4 @@ jobs:
       with:
         name: vulnerability-report.json
         path: vulnerability-report.json 
+  
