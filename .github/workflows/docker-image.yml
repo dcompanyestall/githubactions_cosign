@@ -26,14 +26,14 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         push: true
-        tags:  dcompanyestall/githubactions_cas2_0:v1
+        tags:  dcompanyestall/githubactions_cas2_0:main
         # Important: Add the load=true option to make the image available for subsequent steps
         load: true
    
     - name: Scan the image and upload dependency results
       uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
       with:
-        image: "dcompanyestall/githubactions_cas2_0:v1"
+        image: "dcompanyestall/githubactions_cas2_0:main"
         artifact-name: sbom.spdx.json
         dependency-snapshot: true
 
@@ -46,7 +46,7 @@ jobs:
     # Example: Scan the image for vulnerabilities (optional)
     - name: Trivy vulnerability scan
       run: |
-        IMAGE_NAME=dcompanyestall/githubactions_cas2_0:v1
+        IMAGE_NAME=dcompanyestall/githubactions_cas2_0:main
         trivy image --format json --output vulnerability-report.json "$IMAGE_NAME"
       
     - name: Upload Vulnerability Scan Report
