@@ -37,8 +37,8 @@ jobs:
           syft "docker:$IMAGE_NAME" -o spdx-json > sbom.spdx.json # Use spdx-json for a standard format
 
     - name: Upload SBOM as artifact
-      uses: actions/upload-artifact@v3 # Updated to v3
-      with:
+      uses: actions/upload-artifact@v4 # Updated to v4
+        with:
           name: sbom.spdx.json
           path: sbom.spdx.json
 
@@ -49,8 +49,7 @@ jobs:
         trivy image --format json --output vulnerability-report.json "$IMAGE_NAME"
       
     - name: Upload Vulnerability Scan Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: vulnerability-report.json
         path: vulnerability-report.json 
-          
