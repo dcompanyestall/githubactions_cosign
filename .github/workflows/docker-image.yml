@@ -39,7 +39,7 @@ jobs:
     - name: Scan the image and upload dependency results
       uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
       with:
-        image: "dcompanyestall/githubactions_cas2_0:main"
+        image: "dcompanyestall/githubactions_cas2_0"
         #artifact-name: sbom-spdx-json
         id: sbom-spdx-json
         dependency-snapshot: true
