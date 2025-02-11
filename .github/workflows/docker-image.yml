@@ -149,7 +149,7 @@ jobs:
       env:
         COSIGN_EXPERIMENTAL: "true"
       run: |
-        cosign sign-blob --yes --key ephemeral sbom.spdx.json
+        cosign sign-blob --yes sbom.spdx.json
       
       #- name: Scan the image and upload dependency results
       #  uses: anchore/sbom-action@v0.18.0
