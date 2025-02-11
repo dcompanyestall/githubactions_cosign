@@ -85,7 +85,7 @@ jobs:
     - name: Generate SBOM using Anchore SBOM Action
       uses: anchore/sbom-action@v0
       with:
-        image: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+        image: "${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
         format: "spdx-json"
         output-file: "sbom.spdx.json"
     
