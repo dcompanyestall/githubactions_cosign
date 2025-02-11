@@ -86,7 +86,7 @@ jobs:
       uses: anchore/sbom-action@v0
       with:
         #image: "${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
-        image: "dcompanyestall/githubactions_cas2_1"
+        image: "dcompanyestall/githubactions_cas2_1:main"
         format: "spdx-json"
         output-file: "sbom.spdx.json"
     
