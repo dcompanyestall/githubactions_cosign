@@ -80,7 +80,7 @@ jobs:
         #cache-to: type=gha,mode=max
         # platforms: linux/amd64,linux/arm64
         # Important: Add the load=true option to make the image available for subsequent steps
-        load: true
+        #load: true
         #provenance: true
        
     - name: Debug Image Digest
