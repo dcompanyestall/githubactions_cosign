@@ -132,7 +132,7 @@ jobs:
         #oras push docker.io/$IMAGE_NAME:sbom \
           --artifact-type "application/vnd.syft+json" \
           $SBOM_FILE:application/vnd.syft+json
-        oras push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/my-container:sbom \
+        oras push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:sbom \
             --artifact-type application/spdx+json sbom.spdx.json
   
     - name: Upload SBOM to GitHub Release
