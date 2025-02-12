@@ -129,9 +129,11 @@ jobs:
         echo ${{ secrets.DOCKERHUB_TOKEN }} | oras login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin docker.io
 
         # Push SBOM to Docker Hub as an OCI Artifact
-        oras push docker.io/$IMAGE_NAME:sbom \
+        #oras push docker.io/$IMAGE_NAME:sbom \
           --artifact-type "application/vnd.syft+json" \
           $SBOM_FILE:application/vnd.syft+json
+        oras push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/my-container:sbom \
+            --artifact-type application/spdx+json sbom.spdx.json
   
     - name: Upload SBOM to GitHub Release
       #if: github.event_name == 'release'
