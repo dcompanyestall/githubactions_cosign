@@ -82,6 +82,12 @@ jobs:
      #   load: true
      #   provenance: true
 
+    - name: Set up Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver: docker-container  # ✅ Enables attestation support
+    
     - name: Build and push the Docker image
       uses: docker/build-push-action@v5
       with:
@@ -92,13 +98,7 @@ jobs:
         provenance: true
         builder: ${{ steps.buildx.outputs.name }}  # Use the Buildx builder
 
-    - name: Set up Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v3
-      with:
-        driver: docker-container  # ✅ Enables attestation support
-
-        
+           
     - name: Generate SBOM using Anchore SBOM Action
       uses: anchore/sbom-action@v0
       with:
