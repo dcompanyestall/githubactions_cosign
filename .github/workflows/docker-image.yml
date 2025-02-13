@@ -2,13 +2,18 @@ name: Docker Image CI
 # Installs cosign
 # Logs in to Docker Hub using GitHub secrets.
 # Extracts metadata for better tagging
+# Setup buildx to enable attestation support
 # Builds and pushes the container image to docker hub, establishing provenance  
 # Uses anchore/sbom-action to generate an SBOM in SPDX format.
+# Uploads the SBOM as an artifact to GitHub.
+# Install ORAS for OCI Artifact Support
 # Push SBOM to Docker Hub as an OCI Artifact
 # Upload SBOM to GitHub Release
-# Uploads the SBOM as an artifact to GitHub.
 # Attaches the SBOM as a label to the Docker image in Docker Hub..
 # Signs the resulting container image digest and the SBOM with cosign 
+# Install Trivy
+# Trivy vulnerability scan
+# Upload Vulnerability Scan Report
 
 on:
   push:
@@ -251,4 +256,14 @@ jobs:
       with:
         name: vulnerability-report
         path: vulnerability-report.json
+
+    - name: Upload Trivy Vulnerability scan to GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: vulnerability-report.json
+        tag_name: latest-vulnscan
+        name: "Vulnerability scan  for latest container image"
+        body: "This is the Vulnerability scan for the latest Docker image."
+        draft: false
+        prerelease: false
   
