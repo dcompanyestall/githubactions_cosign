@@ -232,12 +232,11 @@ jobs:
 
     - name: Install Trivy
       run: |
-      # Fetch the latest release version dynamically
+        # Fetch the latest release version dynamically
         LATEST_VERSION=$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | jq -r .tag_name)
-      
-      # Remove the 'v' prefix (if needed)
+        # Remove the 'v' prefix (if needed)
         VERSION=${LATEST_VERSION#v}
-      # Download and install the latest Trivy release
+        # Download and install the latest Trivy release
         wget https://github.com/aquasecurity/trivy/releases/download/${LATEST_VERSION}/trivy_${VERSION}_Linux-64bit.deb
         sudo dpkg -i trivy_${VERSION}_Linux-64bit.deb
         trivy --version  # Verify installation
