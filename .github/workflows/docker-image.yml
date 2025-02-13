@@ -53,7 +53,7 @@ jobs:
         context: .
         push: true
         #tags:  dcompanyestall/githubactions_cas2_0:main
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:v1
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:main
         labels: ${{ steps.meta.outputs.labels }}
         # Important: Add the load=true option to make the image available for subsequent steps
         load: true
@@ -61,7 +61,7 @@ jobs:
     - name: Generate SBOM using Anchore SBOM Action
       uses: anchore/sbom-action@v0
       with:
-        image: "${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:v1"
+        image: "${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:main"
         format: "spdx-json"
         output-file: "sbom.spdx.json"
     
@@ -114,7 +114,7 @@ jobs:
 
     - name: Attach SBOM to Docker Image in Docker Hub
       run: |
-        export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:v1"
+        export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:main"
         export SBOM_FILE="sbom.spdx.json"
           
         docker pull $IMAGE_NAME
