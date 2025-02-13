@@ -162,6 +162,29 @@ jobs:
         docker pull $IMAGE_NAME
         docker build --label "org.opencontainers.image.sbom=$SBOM_FILE" --tag $IMAGE_NAME .
         docker push $IMAGE_NAME
+
+    # Sign the resulting Docker image digest except on PRs.
+    # This will only write to the public Rekor transparency log when the Docker
+    # repository is public to avoid leaking data.  If you would like to publish
+    # transparency data even for private images, pass --force to cosign below.
+    # https://github.com/sigstore/cosign
+    - name: Sign the published Docker image
+      if: ${{ github.event_name != 'pull_request' }}
+      env:
+        # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
+        TAGS: ${{ steps.meta.outputs.tags }}
+        DIGEST: ${{ steps.build-push.outputs.digest }}
+        COSIGN_EXPERIMENTAL: "true"
+      # This step uses the identity token to provision an ephemeral certificate
+      # against the sigstore community Fulcio instance.
+      run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+    - name: Sign SBOM with Cosign
+      env:
+        COSIGN_EXPERIMENTAL: "true"
+      run: |
+        cosign sign-blob --yes sbom.spdx.json
+
       
       #- name: Scan the image and upload dependency results
       #  uses: anchore/sbom-action@v0.18.0
