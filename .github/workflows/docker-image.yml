@@ -218,11 +218,18 @@ jobs:
     #    tar -xzf trivy_Linux-64bit.tar.gz
     #    sudo mv trivy /usr/local/bin/
 
+    #- name: Install Trivy
+    #  run: |
+    #    wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_Linux-64bit.tar.gz
+    #    tar -xzf trivy_Linux-64bit.tar.gz
+    #    sudo mv trivy /usr/local/bin/  
+
     - name: Install Trivy
       run: |
-        wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_Linux-64bit.tar.gz
-        tar -xzf trivy_Linux-64bit.tar.gz
-        sudo mv trivy /usr/local/bin/  
+        sudo apt-get update
+        sudo apt-get install -y wget curl
+        curl -sfL https://aquasecurity.github.io/trivy/scripts/install.sh | sudo sh
+        trivy --version  # Verify installation
 
     - name: Trivy vulnerability scan
       run: |
