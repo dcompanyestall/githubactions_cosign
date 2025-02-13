@@ -66,21 +66,38 @@ jobs:
           type=sha
 
           
-    - name: Build and push the Docker image
+    #- name: Build and push the Docker image
       #uses: docker/build-push-action@v4
-      uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
-      with:
-        context: .
+    #  uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+     # with:
+     #   context: .
         #push: true
-        push: ${{ github.event_name != 'pull_request' }}
+     #   push: ${{ github.event_name != 'pull_request' }}
         #tags:  dcompanyestall/githubactions_cas2_0:main
         #tags: ${{ steps.meta.outputs.tags }}
         #tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:main
+     #   tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:main
+     #   labels: ${{ steps.meta.outputs.labels }}
+        # Important: Add the load=true option to make the image available for subsequent steps
+     #   load: true
+     #   provenance: true
+
+    - name: Build and push the Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:main
         labels: ${{ steps.meta.outputs.labels }}
-        # Important: Add the load=true option to make the image available for subsequent steps
-        load: true
         provenance: true
+        builder: ${{ steps.buildx.outputs.name }}  # Use the Buildx builder
+
+    - name: Set up Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver: docker-container  # ✅ Enables attestation support
+
         
     - name: Generate SBOM using Anchore SBOM Action
       uses: anchore/sbom-action@v0
