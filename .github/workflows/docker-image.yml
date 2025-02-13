@@ -210,15 +210,22 @@ jobs:
     #    name: sbom-spdx-json
     #    path: sbom.spdx.json
 
-    # Example: Scan the image for vulnerabilities (optional)
+    - name: Install Trivy
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget
+        wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_Linux-64bit.tar.gz
+        tar -xzf trivy_Linux-64bit.tar.gz
+        sudo mv trivy /usr/local/bin/
+
     - name: Trivy vulnerability scan
       run: |
         IMAGE_NAME=dcompanyestall/githubactions_cas2_0:main
         trivy image --format json --output vulnerability-report.json "$IMAGE_NAME"
-      
+
     - name: Upload Vulnerability Scan Report
       uses: actions/upload-artifact@v4
       with:
-        name: vulnerability-report.json
-        path: vulnerability-report.json 
+        name: vulnerability-report
+        path: vulnerability-report.json
   
