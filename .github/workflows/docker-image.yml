@@ -14,6 +14,7 @@ name: Docker Image CI
 # Install Trivy
 # Trivy vulnerability scan
 # Upload Vulnerability Scan Report
+# Upload Trivy Vulnerability scan to GitHub Release
 
 on:
   push:
