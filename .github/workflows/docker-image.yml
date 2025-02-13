@@ -25,6 +25,12 @@ permissions:
     actions: write
     security-events: write
 
+env:
+  # Use docker.io for Docker Hub if empty
+  # REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
 
   build-and-push:
@@ -44,7 +50,7 @@ jobs:
         cosign-release: 'v2.2.4'
 
     - name: Login to Docker Hub
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -53,13 +59,20 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2
+        #images: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2
+        images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+        #tags: |
+          #type=semver,pattern={{version}}
+          #type=sha
+
           
     - name: Build and push the Docker image
-      uses: docker/build-push-action@v4
+      #uses: docker/build-push-action@v4
+      uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
       with:
         context: .
-        push: true
+        #push: true
+        push: ${{ github.event_name != 'pull_request' }}
         #tags:  dcompanyestall/githubactions_cas2_0:main
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:main
         labels: ${{ steps.meta.outputs.labels }}
