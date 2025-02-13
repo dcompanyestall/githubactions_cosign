@@ -226,9 +226,8 @@ jobs:
 
     - name: Install Trivy
       run: |
-        sudo apt-get update
-        sudo apt-get install -y wget curl
-        curl -sfL https://aquasecurity.github.io/trivy/scripts/install.sh | sudo sh
+        wget https://github.com/aquasecurity/trivy/releases/download/v0.18.3/trivy_0.18.3_Linux-64bit.deb
+        sudo dpkg -i trivy_0.18.3_Linux-64bit.deb
         trivy --version  # Verify installation
 
     - name: Trivy vulnerability scan
