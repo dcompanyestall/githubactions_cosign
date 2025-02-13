@@ -2,7 +2,7 @@ name: Docker Image CI
 # Installs cosign
 # Logs in to Docker Hub using GitHub secrets.
 # Extracts metadata for better tagging
-# Builds and pushes the container image to docker hub
+# Builds and pushes the container image to docker hub, establishing provenance  
 # Uses anchore/sbom-action to generate an SBOM in SPDX format.
 # Push SBOM to Docker Hub as an OCI Artifact
 # Upload SBOM to GitHub Release
@@ -102,7 +102,8 @@ jobs:
     - name: Generate SBOM using Anchore SBOM Action
       uses: anchore/sbom-action@v0
       with:
-        image: "${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:main"
+        #image: "${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:main"
+        image: ${{ steps.build-push.outputs.digest }}
         format: "spdx-json"
         output-file: "sbom.spdx.json"
     
