@@ -133,7 +133,7 @@ jobs:
 
     - name: Push SBOM to Docker Hub as an OCI Artifact
       run: |
-        export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
+        export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2"
         export SBOM_FILE="sbom.spdx.json"
 
         # Authenticate with Docker Hub
