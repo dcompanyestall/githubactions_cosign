@@ -80,6 +80,7 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         # Important: Add the load=true option to make the image available for subsequent steps
         load: true
+        provenance: true
         
     - name: Generate SBOM using Anchore SBOM Action
       uses: anchore/sbom-action@v0
