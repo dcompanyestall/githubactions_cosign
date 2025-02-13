@@ -74,8 +74,8 @@ jobs:
         #push: true
         push: ${{ github.event_name != 'pull_request' }}
         #tags:  dcompanyestall/githubactions_cas2_0:main
-        tags: ${{ steps.meta.outputs.tags }}
-        #tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas2_2:main
+        #tags: ${{ steps.meta.outputs.tags }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:main
         labels: ${{ steps.meta.outputs.labels }}
         # Important: Add the load=true option to make the image available for subsequent steps
         load: true
