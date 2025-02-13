@@ -211,14 +211,14 @@ jobs:
     #    path: sbom.spdx.json
 
     # Example: Scan the image for vulnerabilities (optional)
-    #- name: Trivy vulnerability scan
-    #  run: |
-    #    IMAGE_NAME=dcompanyestall/githubactions_cas2_0:main
-    #    trivy image --format json --output vulnerability-report.json "$IMAGE_NAME"
+    - name: Trivy vulnerability scan
+      run: |
+        IMAGE_NAME=dcompanyestall/githubactions_cas2_0:main
+        trivy image --format json --output vulnerability-report.json "$IMAGE_NAME"
       
-    #- name: Upload Vulnerability Scan Report
-    #  uses: actions/upload-artifact@v4
-    #  with:
-    #    name: vulnerability-report.json
-    #    path: vulnerability-report.json 
+    - name: Upload Vulnerability Scan Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: vulnerability-report.json
+        path: vulnerability-report.json 
   
