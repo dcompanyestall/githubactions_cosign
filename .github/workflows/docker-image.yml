@@ -90,6 +90,12 @@ jobs:
         provenance: true
         builder: ${{ steps.buildx.outputs.name }}  # Use the Buildx builder
 
+    - name: Generate subject for provenance
+      id: hash
+      run: |
+        set -euo pipefail
+        IMAGE_DIGEST="${{ steps.build-push.outputs.digest }}"
+        echo "hashes=sha256:${IMAGE_DIGEST}" >> "${GITHUB_OUTPUT}"
            
     - name: Generate SBOM using Anchore SBOM Action
       uses: anchore/sbom-action@v0
@@ -220,4 +226,15 @@ jobs:
         body: "This is the Vulnerability scan for the latest Docker image."
         draft: false
         prerelease: false
-  
+
+  provenance:
+    needs: [build-and-push]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.4.0
+    with:
+      base64-subjects: "${{ needs.build-and-push.outputs.hashes }}"
+      upload-assets: true
+ 
