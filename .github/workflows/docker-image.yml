@@ -23,6 +23,7 @@ on:
     tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 permissions:
     contents: write
@@ -41,8 +42,8 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
-    outputs:
-      digests: ${{ steps.hash.outputs.digests }}
+    #outputs:
+      #digests: ${{ steps.hash.outputs.digests }}
     
 
     steps:
@@ -77,8 +78,8 @@ jobs:
     - name: Set up Buildx
       id: buildx
       uses: docker/setup-buildx-action@v3
-      with:
-        driver: docker-container  # ✅ Enables attestation support
+      #with:
+        #driver: docker-container  # ✅ Enables attestation support
     
     - name: Build and push the Docker image
       id: build-push
@@ -89,16 +90,9 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3:main
         labels: ${{ steps.meta.outputs.labels }}
-        provenance: true
-        builder: ${{ steps.buildx.outputs.name }}  # Use the Buildx builder
-
-    - name: Generate subject for provenance
-      id: hash
-      run: |
-        set -euo pipefail
-        IMAGE_DIGEST="${{ steps.build-push.outputs.digest }}"
-        echo "hashes=sha256:${IMAGE_DIGEST}" >> "${GITHUB_OUTPUT}"
-           
+        #provenance: true
+        #builder: ${{ steps.buildx.outputs.name }}  # Use the Buildx builder
+             
     - name: Generate SBOM using Anchore SBOM Action
       uses: anchore/sbom-action@v0
       with:
@@ -158,8 +152,8 @@ jobs:
     #- name: Authenticate to Docker Hub
     #  run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-    - name: Verify image exists on Docker Hub
-      run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3@${{ steps.build-push.outputs.digest }}
+    #- name: Verify image exists on Docker Hub
+    #  run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3@${{ steps.build-push.outputs.digest }}
     
     # Sign the resulting Docker image digest except on PRs.
     # This will only write to the public Rekor transparency log when the Docker
@@ -229,28 +223,10 @@ jobs:
         draft: false
         prerelease: false
     
-  #provenance:
-  #  needs: [build-and-push]
-  #  permissions:
-  #    actions: read
-  #    id-token: write
-  #    contents: write
-  #  uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.4.0
-  #  with:
-  #    image: "docker.io/your-dockerhub-username/githubactions_cas3"
-  #    digest: "${{ needs.build-and-push.outputs.digests }}"
-      #registry-username: "${{ secrets.DOCKERHUB_USERNAME }}"
-  #    registry-username: "dcompanyestall"
-  #    upload-assets: true
-  provenance:
-    needs: [build-and-push]
-    permissions:
-      actions: read
-      id-token: write
-      contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.4.0
-    with:
-      base64-subjects: "${{ needs.build-and-push.outputs.digests }}"
-      upload-assets: true # Optional: Upload to a new release
+    - name: Generate SLSA provenance
+      uses: slsa-framework/slsa-github-generator@v1
+      with:
+        base64-subjects: "$(cosign triangulate ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3:main)"
+        predicate-type: "https://slsa.dev/provenance/v1"
 
  
