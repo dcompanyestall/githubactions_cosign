@@ -237,7 +237,7 @@ jobs:
       contents: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.4.0
     with:
-      image: "${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3"
+      image: "${{ steps.meta.outputs.image }}"
       digest: "${{ needs.build-and-push.outputs.digests }}"
       base64-subjects: "${{ needs.build-and-push.outputs.hashes }}"
       upload-assets: true
