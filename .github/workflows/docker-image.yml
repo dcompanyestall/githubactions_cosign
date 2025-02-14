@@ -224,7 +224,7 @@ jobs:
         prerelease: false
     
     - name: Generate SLSA provenance
-      uses: slsa-framework/slsa-github-generator@v1
+      uses:   slsa-framework/slsa-github-generator/.github/workflows/generator_container-based_slsa3.yml@v2.0.0
       with:
         base64-subjects: "$(cosign triangulate ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3:main)"
         predicate-type: "https://slsa.dev/provenance/v1"
