@@ -226,7 +226,7 @@ jobs:
   provenance:
     name: Generate SLSA Provenance
     needs: build-and-push
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container-based_slsa3.yml@v1.8.0
+    uses: slsa-framework/slsa-github-generator/blob/main/.github/workflows/generator_container_slsa3.yml:v2.0.0
     with:
       subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3:main"
 
