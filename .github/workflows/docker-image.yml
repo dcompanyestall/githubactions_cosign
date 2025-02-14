@@ -228,7 +228,7 @@ jobs:
         body: "This is the Vulnerability scan for the latest Docker image."
         draft: false
         prerelease: false
-
+    
   provenance:
     needs: [build-and-push]
     permissions:
@@ -239,6 +239,7 @@ jobs:
     with:
       image: "docker.io/your-dockerhub-username/githubactions_cas3"
       digest: "${{ needs.build-and-push.outputs.digests }}"
-      base64-subjects: "${{ needs.build-and-push.outputs.hashes }}"
+      registry-username: "${{ secrets.DOCKERHUB_USERNAME }}"
       upload-assets: true
+
  
