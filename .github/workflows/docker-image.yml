@@ -239,7 +239,8 @@ jobs:
     with:
       image: "docker.io/your-dockerhub-username/githubactions_cas3"
       digest: "${{ needs.build-and-push.outputs.digests }}"
-      registry-username: "${{ secrets.DOCKERHUB_USERNAME }}"
+      #registry-username: "${{ secrets.DOCKERHUB_USERNAME }}"
+      registry-username: "dcompanyestall"
       upload-assets: true
 
  
