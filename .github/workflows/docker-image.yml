@@ -204,7 +204,7 @@ jobs:
 
     - name: Trivy vulnerability scan
       run: |
-        IMAGE_NAME=dcompanyestall/githubactions_cas3_0:main
+        IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3@${{ steps.build-push.outputs.digest }}
         trivy image --format json --output vulnerability-report.json "$IMAGE_NAME"
 
     - name: Upload Vulnerability Scan Report
