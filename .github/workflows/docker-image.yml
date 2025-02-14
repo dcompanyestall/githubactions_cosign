@@ -10,7 +10,7 @@ name: Docker Image CI
 # Push SBOM to Docker Hub as an OCI Artifact
 # Upload SBOM to GitHub Release
 # Attaches the SBOM as a label to the Docker image in Docker Hub..
-# Signs the resulting container image digest and the SBOM with cosign 
+# Signs the resulting container image digest and the SBOM with cosign user's private key 
 # Install Trivy
 # Trivy vulnerability scan
 # Upload Vulnerability Scan Report
