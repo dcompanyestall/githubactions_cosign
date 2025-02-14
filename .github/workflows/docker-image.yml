@@ -233,7 +233,7 @@ jobs:
       image: dcompanyestall/githubactions_cas3
       digest: ${{ needs.build-and-push.outputs.image-digest }}
     secrets:
-      username: ${{ secrets.DOCKERHUB_USERNAME }}
-      password: ${{ secrets.DOCKERHUB_TOKEN }}
+      registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
  
