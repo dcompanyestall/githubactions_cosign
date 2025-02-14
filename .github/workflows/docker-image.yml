@@ -229,6 +229,19 @@ jobs:
         draft: false
         prerelease: false
     
+  #provenance:
+  #  needs: [build-and-push]
+  #  permissions:
+  #    actions: read
+  #    id-token: write
+  #    contents: write
+  #  uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.4.0
+  #  with:
+  #    image: "docker.io/your-dockerhub-username/githubactions_cas3"
+  #    digest: "${{ needs.build-and-push.outputs.digests }}"
+      #registry-username: "${{ secrets.DOCKERHUB_USERNAME }}"
+  #    registry-username: "dcompanyestall"
+  #    upload-assets: true
   provenance:
     needs: [build-and-push]
     permissions:
@@ -237,10 +250,9 @@ jobs:
       contents: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.4.0
     with:
-      image: "docker.io/your-dockerhub-username/githubactions_cas3"
+      image: "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3"
       digest: "${{ needs.build-and-push.outputs.digests }}"
-      #registry-username: "${{ secrets.DOCKERHUB_USERNAME }}"
-      registry-username: "dcompanyestall"
-      upload-assets: true
+      registry-username: "${{ secrets.DOCKERHUB_USERNAME }}"
+      registry-password: "${{ secrets.DOCKERHUB_TOKEN }}"
 
  
