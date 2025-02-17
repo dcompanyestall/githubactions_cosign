@@ -1,20 +1,9 @@
 name: Docker Image CI
-# Installs cosign
 # Logs in to Docker Hub using GitHub secrets.
 # Extracts metadata for better tagging
 # Setup buildx to enable attestation support
 # Builds and pushes the container image to docker hub, establishing provenance  
-# Uses anchore/sbom-action to generate an SBOM in SPDX format.
-# Uploads the SBOM as an artifact to GitHub.
-# Install ORAS for OCI Artifact Support
-# Push SBOM to Docker Hub as an OCI Artifact
-# Upload SBOM to GitHub Release
-# Attaches the SBOM as a label to the Docker image in Docker Hub..
-# Signs the resulting container image digest and the SBOM with cosign user's private key 
-# Install Trivy
-# Trivy vulnerability scan
-# Upload Vulnerability Scan Report
-# Upload Trivy Vulnerability scan to GitHub Release
+# Generates SLSA provenance
 
 on:
   push:
@@ -31,7 +20,7 @@ permissions:
     id-token: write
     actions: write
     security-events: write
-
+    
 env:
   # Use docker.io for Docker Hub if empty
   # REGISTRY: ghcr.io
@@ -50,14 +39,6 @@ jobs:
     - name: Checkout the repository code
       uses: actions/checkout@v4
 
-    # Install the cosign tool except on PR
-    # https://github.com/sigstore/cosign-installer
-    - name: Install cosign
-      if: github.event_name != 'pull_request'
-      uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
-      with:
-        cosign-release: 'v2.2.4'
-
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
@@ -68,7 +49,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        #images: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3
+        #images: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1
         images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
         tags: |
           type=semver,pattern={{version}}
@@ -88,141 +69,11 @@ jobs:
         context: .
         #push: ${{ github.event_name != 'pull_request' }}
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3:main
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1:main
         labels: ${{ steps.meta.outputs.labels }}
         #provenance: true
-        #builder: ${{ steps.buildx.outputs.name }}  # Use the Buildx builder
-             
-    - name: Generate SBOM using Anchore SBOM Action
-      uses: anchore/sbom-action@v0
-      with:
-        #image: "${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3:main"
-        #image: ${{ steps.build-push.outputs.digest }}
-        image: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3@${{ steps.build-push.outputs.digest }}
-        format: "spdx-json"
-        output-file: "sbom.spdx.json"
-        
-    - name: Upload SBOM as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: sbom-spdx-json
-        path: sbom.spdx.json
-
-    - name: Install ORAS for OCI Artifact Support
-      run: |
-        ORAS_VERSION=$(curl -s https://api.github.com/repos/oras-project/oras/releases/latest | jq -r '.tag_name' | sed 's/v//')
-        curl -LO https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz
-        tar -xvzf oras_${ORAS_VERSION}_linux_amd64.tar.gz
-        chmod +x oras
-        sudo mv oras /usr/local/bin/oras
-        oras version
-
-    - name: Push SBOM to Docker Hub as an OCI Artifact
-      run: |
-        export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3"
-        export SBOM_FILE="sbom.spdx.json"
-
-        # Authenticate with Docker Hub
-        echo ${{ secrets.DOCKERHUB_TOKEN }} | oras login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin docker.io
-
-        # Push SBOM to Docker Hub as an OCI Artifact
-        oras push docker.io/$IMAGE_NAME:sbom \
-          --artifact-type "application/vnd.syft+json" \
-          $SBOM_FILE:application/vnd.syft+json
-
-    - name: Upload SBOM to GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: sbom.spdx.json
-        tag_name: latest-sbom
-        name: "SBOM for latest container image"
-        body: "This is the SBOM for the latest Docker image."
-        draft: false
-        prerelease: false
-
-    - name: Attach SBOM to Docker Image in Docker Hub
-      run: |
-        export IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3:main"
-        export SBOM_FILE="sbom.spdx.json"
-          
-        docker pull $IMAGE_NAME
-        docker build --label "org.opencontainers.image.sbom=$SBOM_FILE" --tag $IMAGE_NAME .
-        docker push $IMAGE_NAME
-
-    #- name: Authenticate to Docker Hub
-    #  run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
-    #- name: Verify image exists on Docker Hub
-    #  run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3@${{ steps.build-push.outputs.digest }}
-    
-    # Sign the resulting Docker image digest except on PRs.
-    # This will only write to the public Rekor transparency log when the Docker
-    # repository is public to avoid leaking data.  If you would like to publish
-    # transparency data even for private images, pass --force to cosign below.
-    # https://github.com/sigstore/cosign
-    - name: Sign the published Docker image
-      if: ${{ github.event_name != 'pull_request' }}
-      env:
-        # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-        TAGS: ${{ steps.meta.outputs.tags }}
-        IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3
-        DIGEST: ${{ steps.build-push.outputs.digest }}
-        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        COSIGN_EXPERIMENTAL: "true"
-      # This step uses the identity token to provision an ephemeral certificate
-      # against the sigstore community Fulcio instance.
-      # run: echo "${TAGS}" | xargs -I {} cosign sign --yes --key env://COSIGN_PRIVATE_KEY {}@${DIGEST}
-      run: |
-        echo "Tags: ${TAGS}"
-        echo "Digest: ${DIGEST}"
-        echo "Signing ${IMAGE}@${DIGEST}"
-        cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${IMAGE}@${DIGEST}"
-        #for tag in ${TAGS}; do
-        #  echo "Signing ${tag}@${DIGEST}"
-        #  cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${tag}@${DIGEST}"
-        #done
-
-    - name: Sign SBOM with Cosign
-      env:
-        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        COSIGN_EXPERIMENTAL: "true"
-      run: |
-        cosign sign-blob --yes --key env://COSIGN_PRIVATE_KEY sbom.spdx.json
-  
-    - name: Install Trivy
-      run: |
-        # Fetch the latest release version dynamically
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | jq -r .tag_name)
-        # Remove the 'v' prefix (if needed)
-        VERSION=${LATEST_VERSION#v}
-        # Download and install the latest Trivy release
-        wget https://github.com/aquasecurity/trivy/releases/download/${LATEST_VERSION}/trivy_${VERSION}_Linux-64bit.deb
-        sudo dpkg -i trivy_${VERSION}_Linux-64bit.deb
-        trivy --version  # Verify installation
-
-    - name: Trivy vulnerability scan
-      run: |
-        IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3@${{ steps.build-push.outputs.digest }}
-        trivy image --format json --output vulnerability-report.json "$IMAGE_NAME"
-
-    - name: Upload Vulnerability Scan Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: vulnerability-report
-        path: vulnerability-report.json
-
-    - name: Upload Trivy Vulnerability scan to GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: vulnerability-report.json
-        tag_name: latest-vulnscan
-        name: "Vulnerability scan  for latest container image"
-        body: "This is the Vulnerability scan for the latest Docker image."
-        draft: false
-        prerelease: false
-    
+        #builder: ${{ steps.buildx.outputs.name }}  # Use the Buildx builder   
+   
   provenance:
     name: Generate SLSA Provenance
     needs: [build-and-push]
@@ -232,10 +83,10 @@ jobs:
         packages: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
     with:
-      #subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3:main"
-      image: dcompanyestall/githubactions_cas3
-      #subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3@${{ needs.build-and-push.outputs.image-digest }}"
-      #image: dcompanyestall/githubactions_cas3@${{ needs.build-and-push.outputs.image-digest }}
+      #subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1:main"
+      image: dcompanyestall/githubactions_cas3_1
+      #subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1@${{ needs.build-and-push.outputs.image-digest }}"
+      #image: dcompanyestall/githubactions_cas3_1@${{ needs.build-and-push.outputs.image-digest }}
       digest: ${{ needs.build-and-push.outputs.image-digest }}
     secrets:
       registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
