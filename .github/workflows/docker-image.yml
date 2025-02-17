@@ -93,7 +93,8 @@ jobs:
       #subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1@${{ needs.build-and-push.outputs.image-digest }}"
       #image: dcompanyestall/githubactions_cas3_1@${{ needs.build-and-push.outputs.image-digest }}
       #digest: ${{ needs.build-and-push.outputs.image-digest }}
-      digest: ${{ needs.build-and-push.outputs.digest }}
+      #digest: ${{ needs.build-and-push.outputs.digest }}
+      digest: sha256:714b02235db60c7bbfd66e8d8fa4ba7302b36f1530b16f7b17afec059e5d2242"
     secrets:
       registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
       registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
