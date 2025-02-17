@@ -32,7 +32,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
-      image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+      image: $username/${{ env.IMAGE_NAME }}
       digest: ${{ steps.build-push.outputs.digest }}
     
 
