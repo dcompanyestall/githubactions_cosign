@@ -32,7 +32,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
-      image: $username/${{ env.IMAGE_NAME }}
+      image: ${{ env.IMAGE_NAME }}
       digest: ${{ steps.build-push.outputs.digest }}
     
 
@@ -89,11 +89,9 @@ jobs:
         packages: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
     with:
-      #subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1:main"
-      image: ${{ needs.build-and-push.outputs.image }}
-      #subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1@${{ needs.build-and-push.outputs.image-digest }}"
-      #image: dcompanyestall/githubactions_cas3_1@${{ needs.build-and-push.outputs.image-digest }}
-      #digest: ${{ needs.build-and-push.outputs.image-digest }}
+      #image: ${{ needs.build-and-push.outputs.image }}
+      #image: dcompanyestall/githubactions_cas3_1
+      image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ needs.build-and-push.outputs.image }}
       digest: ${{ needs.build-and-push.outputs.digest }}
     secrets:
       registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
