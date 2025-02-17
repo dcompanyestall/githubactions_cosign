@@ -233,7 +233,7 @@ jobs:
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
     with:
       #subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3:main"
-      image: dcompanyestall/githubactions_cas3:main
+      image: dcompanyestall/githubactions_cas3
       #subjects: "oci://${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3@${{ needs.build-and-push.outputs.image-digest }}"
       #image: dcompanyestall/githubactions_cas3@${{ needs.build-and-push.outputs.image-digest }}
       digest: ${{ needs.build-and-push.outputs.image-digest }}
