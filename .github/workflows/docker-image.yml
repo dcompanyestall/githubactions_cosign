@@ -91,7 +91,7 @@ jobs:
     with:
       #image: ${{ needs.build-and-push.outputs.image }}
       #image: dcompanyestall/githubactions_cas3_1
-      image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ needs.build-and-push.outputs.image }}
+      image: $registry-username/${{ needs.build-and-push.outputs.image }}
       digest: ${{ needs.build-and-push.outputs.digest }}
     secrets:
       registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
