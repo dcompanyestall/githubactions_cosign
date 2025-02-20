@@ -1,9 +1,7 @@
 name: Cosign Image on Push
-# Logs in to Docker Hub using GitHub secrets.
-# Extracts metadata for better tagging
-# Setup buildx to enable attestation support
-# Builds and pushes the container image to docker hub, establishing provenance  
-# Generates SLSA provenance
+# Install the cosign tool
+# Build and Sign Image
+# Verify Image Signature
 
 on:
   push:
@@ -59,7 +57,6 @@ jobs:
       run: |
         docker build -t ${{ env.IMAGE_NAME }}:main .
         echo "Signing ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:main"
-        #cosign sign --key env://COSIGN_PRIVATE_KEY ${{ env.IMAGE_NAME }}:main
         cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cosign:main
         #cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:main
         docker push ${{ env.IMAGE_NAME }}:main
