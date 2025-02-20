@@ -43,14 +43,11 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Decode Cosign Key
-      run: echo "${{ secrets.COSIGN_KEY }}" | base64 -d > cosign.key
         
     - name: Build and Sign Image
       run: |
         docker build -t ${{ env.IMAGE_NAME }}:main .
-        cosign sign --key cosign.key ${{ env.IMAGE_NAME }}:main
+        cosign sign --key ${{ secrets.COSIGN_KEY }} ${{ env.IMAGE_NAME }}:main
         docker push ${{ env.IMAGE_NAME }}:main
 
     - name: Verify Image Signature
