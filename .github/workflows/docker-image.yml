@@ -44,23 +44,18 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Debug Secrets
-      run: |
-        echo "COSIGN_PRIVATE_KEY length: ${#COSIGN_PRIVATE_KEY}"
-      env:
-        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-
-    - name: Save Cosign Key
-      run: echo "${{ secrets.COSIGN_PRIVATE_KEY }}" | base64 -d > cosign.key
-        
+    #- name: Debug Secrets
+    #  run: |
+    #    echo "COSIGN_PRIVATE_KEY length: ${#COSIGN_PRIVATE_KEY}"
+    #  env:
+    #    COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          
     - name: Build and Sign Image
       run: |
         docker build -t ${{ env.IMAGE_NAME }}:main .
-        cosign sign --key cosign.key ${{ env.IMAGE_NAME }}:main
-        #cosign sign --key ${{ secrets.COSIGN_PRIVATE_KEY }} ${{ env.IMAGE_NAME }}:main
-        #echo "${{ secrets.COSIGN_PASSWORD }}" | cosign sign --key ${{ secrets.COSIGN_PRIVATE_KEY }} ${{ env.IMAGE_NAME }}:main
+        cosign sign --key env://COSIGN_PRIVATE_KEY ${{ env.IMAGE_NAME }}:main
         docker push ${{ env.IMAGE_NAME }}:main
 
     - name: Verify Image Signature
-      run: cosign verify --key ${{ secrets.COSIGN_PUBLIC_KEY }} ${{ env.IMAGE_NAME }}:main
+      run: cosign verify --key env://COSIGN_PUBLIC_KEY ${{ env.IMAGE_NAME }}:main
         
