@@ -59,9 +59,8 @@ jobs:
         COSIGN_EXPERIMENTAL: "true"
       run: |
         docker build -t ${{ env.IMAGE_NAME }}:main .
-        docker push ${{ env.IMAGE_NAME }}:main
         #cosign sign --key env://COSIGN_PRIVATE_KEY ${{ env.IMAGE_NAME }}:main
-        cosign sign --key env://COSIGN_PRIVATE_KEY githubactions_cosign:main
+        cosign sign --key env://COSIGN_PRIVATE_KEY dcompanyestall/githubactions_cosign:main
         docker push ${{ env.IMAGE_NAME }}:main
 
     - name: Verify Image Signature
