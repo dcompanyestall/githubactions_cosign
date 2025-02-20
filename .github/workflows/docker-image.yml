@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Cosign Image on Push
 # Logs in to Docker Hub using GitHub secrets.
 # Extracts metadata for better tagging
 # Setup buildx to enable attestation support
@@ -8,93 +8,48 @@ name: Docker Image CI
 on:
   push:
     branches: [ "main" ]
-    # Publish semrer tags as releases.
-    tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
-
+    
 permissions:
     contents: write
     packages: write
     id-token: write
     actions: write
     security-events: write
-    
+
 env:
   # Use docker.io for Docker Hub if empty
   # REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-
+    
 jobs:
 
-  build-and-push:
-    runs-on: ubuntu-latest
-    outputs:
-      image: ${{ env.IMAGE_NAME }}
-      digest: ${{ steps.build-push.outputs.digest }}
-    
+  sign-and-verify:
+    runs-on: ubuntu-latest   
 
     steps:
     - name: Checkout the repository code
       uses: actions/checkout@v4
+
+    # Install the cosign tool except on PR
+    # https://github.com/sigstore/cosign-installer
+    - name: Install cosign
+      uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
+      with:
+        cosign-release: 'v2.2.4'
 
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
-    - name: Extract metadata for Docker image
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        #images: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1
-        images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=semver,pattern={{version}}
-          type=sha  # Tags the image with the commit SHA
-          type=ref,event=branch  # Tags the image with the branch name
-         
-    - name: Set up Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v3
-      #with:
-        #driver: docker-container  # ✅ Enables attestation support
-    
-    - name: Build and push the Docker image
-      id: build-push
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        #push: ${{ github.event_name != 'pull_request' }}
-        push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1:main
-        labels: ${{ steps.meta.outputs.labels }}
-        #provenance: true
-        #builder: ${{ steps.buildx.outputs.name }}  # Use the Buildx builder 
-        provenance: true
-        outputs: type=image,name=${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cas3_1,push=true
-
-    - name: Capture image digest
-      run: echo "IMAGE_DIGEST=${{ steps.build-push.outputs.digest }}" >> $GITHUB_ENV
         
-  provenance:
-    name: Generate SLSA Provenance
-    needs: [build-and-push]
-    permissions:
-        actions: read # for detecting the Github Actions environment.
-        id-token: write # for creating OIDC tokens for signing.
-        packages: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
-    with:
-      #image: ${{ needs.build-and-push.outputs.image }}
-      image: dcompanyestall/githubactions_cas3_1
-      #image: dcompanyestall/${{ needs.build-and-push.outputs.image }}
-      digest: ${{ needs.build-and-push.outputs.digest }}
-    secrets:
-      registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
-      registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Build and Sign Image
+      run: |
+        docker build -t ${{ env.IMAGE_NAME }}:main .
+        ./cosign sign --key ${{ secrets.COSIGN_KEY }} ${{ env.IMAGE_NAME }}:main
+        docker push ${{ env.IMAGE_NAME }}:main
 
- 
+    - name: Verify Image Signature
+      run: ./cosign verify --key ${{ secrets.COSIGN_PUB }} ${{ env.IMAGE_NAME }}:main
+        
