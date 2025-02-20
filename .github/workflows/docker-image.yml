@@ -61,10 +61,10 @@ jobs:
         docker build -t ${{ env.IMAGE_NAME }}:main .
         echo "Signing ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:main"
         #cosign sign --key env://COSIGN_PRIVATE_KEY ${{ env.IMAGE_NAME }}:main
-        #cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cosign:main
-        cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:main
+        cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cosign:main
+        #cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:main
         docker push ${{ env.IMAGE_NAME }}:main
 
     - name: Verify Image Signature
-      run: cosign verify --key env://COSIGN_PUBLIC_KEY ${{ env.IMAGE_NAME }}:main
+      run: cosign verify --key env://COSIGN_PUBLIC_KEY ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cosign:main
         
