@@ -43,6 +43,12 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Debug Secrets
+      run: |
+        echo "COSIGN_PRIVATE_KEY length: ${#COSIGN_PRIVATE_KEY}"
+      env:
+        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
         
     - name: Build and Sign Image
       run: |
