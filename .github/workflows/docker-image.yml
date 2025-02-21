@@ -48,7 +48,7 @@ jobs:
     #  env:
     #    COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           
-    - name: Build and Sign Image
+    - name: Build, Push, and Sign Image
       env:
         # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
         COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
@@ -56,10 +56,11 @@ jobs:
         COSIGN_EXPERIMENTAL: "true"
       run: |
         docker build -t ${{ env.IMAGE_NAME }}:main .
+        docker push ${{ env.IMAGE_NAME }}:main
         echo "Signing ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:main"
         cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cosign:main
         #cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:main
-        docker push ${{ env.IMAGE_NAME }}:main
+        
     
     - name: Verify Image Signature
       env:
