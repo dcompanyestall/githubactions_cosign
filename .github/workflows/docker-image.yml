@@ -65,6 +65,7 @@ jobs:
       env:
         # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
         COSIGN_PUBLIC_KEY: ${{ secrets.COSIGN_PUBLIC_KEY }}
+        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
         COSIGN_EXPERIMENTAL: "true"
       run: cosign verify --key env://COSIGN_PUBLIC_KEY ${{ secrets.DOCKERHUB_USERNAME }}/githubactions_cosign:main
         
