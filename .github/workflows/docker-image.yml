@@ -1,6 +1,6 @@
 name: Cosign Image on Push
 # Install the cosign tool
-# Build and Sign Image
+# Build, push, and Sign Image
 # Verify Image Signature
 
 on:
